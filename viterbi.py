@@ -72,11 +72,13 @@ def countMismatchBits(s1,s2):
 #take map, current state and observation and return number of incorect bits 
 def getIncorrectValues(mapData, state, observation):
 
+    mapData = np.pad(mapData, (1,1), mode='constant', constant_values=(1,1))
+
     x,y = state
-    N = str(int(mapData[x-1,y]))
-    S = str(int(mapData[x+1,y]))
-    W = str(int(mapData[x,y-1]))
-    E = str(int(mapData[x,y+1]))
+    N = str(int(mapData[x,y+1]))
+    S = str(int(mapData[x+2,y+1]))
+    W = str(int(mapData[x+1,y]))
+    E = str(int(mapData[x+1,y+2]))
 
     neighboursString = N + S + W + E
 
@@ -154,10 +156,10 @@ def viterbiFowardAlgorithm(mapData,stateSpace,observationList,errorRate):
 mapData, stateSpace, observationList, errorRate, mapSize= readInputFile()
 
 #pad border with 1s (CHECK IF NEEDED)
-paddedMapData = np.pad(mapData, (1,1), mode='constant', constant_values=(1,1))
+
 
 #create trellis matrix using input data
-trellisMatrix = viterbiFowardAlgorithm(paddedMapData,stateSpace,observationList,errorRate)
+trellisMatrix = viterbiFowardAlgorithm(mapData,stateSpace,observationList,errorRate)
 
 numberObservations = len(observationList)
 
