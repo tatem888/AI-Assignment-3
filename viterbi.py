@@ -5,6 +5,9 @@ import sys
 
 ### CHANGE FILE INPUT WHEN DONE TESTING ###
 
+#sys.argv[1]
+#"inputFile2.txt"
+
 def readInputFile():
 
     with open(sys.argv[1], "r") as inputFile:
@@ -123,42 +126,23 @@ def createEmissionMatrix(mapData, stateSpace, observationList, errorRate,K,T):
 
 #transition matrix
 def createTransitionMatrix(K, stateSpace, mapData):
-    transitionMatrix = np.zeros([K,K])
+    #init transition matrix of zeros
+    transitionMatrix = np.zeros((K, K))
 
-    #iterate over transition matrix
+    #create dictonary to map state with index in stateSpace
+    stateDict = {tuple(state): i for i, state in enumerate(stateSpace)}
+    for i, (x, y) in enumerate(stateSpace):
+        transitions = []
 
-    for i in stateSpace:
-        for j in stateSpace:
+        for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
+            if (x+dx, y+dy) in stateDict:
+                transitions.append(stateDict[(x+dx, y+dy)])
+
+        probability = 1 / len(transitions) if transitions else 0
+
+        for j in transitions:
+            transitionMatrix[i, j] = probability
             
-            #if not comparing to itself
-            if i != j:
-
-                x,y = j
-                #check neighbour values
-                N = int(mapData[x-1,y])
-                S = int(mapData[x+1,y])
-                W = int(mapData[x,y-1])
-                E = int(mapData[x,y+1])
-
-                #total neightbours
-                neighbours = 4-N-S-W-E
-
-                if neighbours == 0:
-                    prob = 0
-                #split probability between neighbours
-                else:
-                    prob = 1/neighbours
-                
-                # set neighbours value in table to 
-                if N == 0:
-                    transitionMatrix[x,y-1] = prob
-                if S ==0:
-                    transitionMatrix[x,y+1] = prob
-                if W == 0:
-                    transitionMatrix[x-1,y] = prob
-                if E == 0:
-                    transitionMatrix[x+1,y] = prob
-
     return transitionMatrix
  
 def viterbiFowardAlgorithm(mapData,stateSpace,observationList,errorRate):
@@ -205,6 +189,7 @@ numberObservations = len(observationList)
 maps= []
 
 for obsRow in range(numberObservations):
+
     outputMap = np.zeros(mapSize)
     trellisCount = 0
     for i in range(mapSize[0]):
