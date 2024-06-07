@@ -44,7 +44,7 @@ def readInputFile():
         #read and write sensor error rate as float
         errorRate = float(inputFile.readline())
         
-    return(mapData, stateSpace, observationList, errorRate, mapSize)
+    return mapData, stateSpace, observationList, errorRate, mapSize
 
 #OBSERVATION SPACE - Any possible observation eg 0000 0011 1101 ect - N = 4^2 observation possibilites
 
@@ -133,7 +133,7 @@ def viterbiFowardAlgorithm(mapData,stateSpace,observationList,errorRate):
 
     #compute for first column with no previous variables
     for i in range(K):
-        trellisMatrix[i,0] = initialProbability * Em[i,1]
+        trellisMatrix[i,0] = initialProbability * Em[i,0]
 
     for j in range(1,T):
 
