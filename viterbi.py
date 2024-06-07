@@ -161,8 +161,6 @@ trellisMatrix = viterbiFowardAlgorithm(paddedMapData,stateSpace,observationList,
 
 numberObservations = len(observationList)
 
-
-
 maps= []
 
 for obsRow in range(numberObservations):
