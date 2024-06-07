@@ -123,42 +123,24 @@ def createEmissionMatrix(mapData, stateSpace, observationList, errorRate,K,T):
 
 #transition matrix
 def createTransitionMatrix(K, stateSpace, mapData):
-    transitionMatrix = np.zeros([K,K])
 
-    #iterate over transition matrix
+    #init transition matrix of zeros
+    transitionMatrix = np.zeros((K, K))
 
-    for i in stateSpace:
-        for j in stateSpace:
+    #create dictonary to map state with index in stateSpace
+    stateDict = {tuple(state): i for i, state in enumerate(stateSpace)}
+    for i, (x, y) in enumerate(stateSpace):
+        transitions = []
+
+        for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
+            if (x+dx, y+dy) in stateDict:
+                transitions.append(stateDict[(x+dx, y+dy)])
+
+        probability = 1 / len(transitions) if transitions else 0
+
+        for j in transitions:
+            transitionMatrix[i, j] = probability
             
-            #if not comparing to itself
-            if i != j:
-
-                x,y = j
-                #check neighbour values
-                N = int(mapData[x-1,y])
-                S = int(mapData[x+1,y])
-                W = int(mapData[x,y-1])
-                E = int(mapData[x,y+1])
-
-                #total neightbours
-                neighbours = 4-N-S-W-E
-
-                if neighbours == 0:
-                    prob = 0
-                #split probability between neighbours
-                else:
-                    prob = 1/neighbours
-                
-                # set neighbours value in table to 
-                if N == 0:
-                    transitionMatrix[x,y-1] = prob
-                if S ==0:
-                    transitionMatrix[x,y+1] = prob
-                if W == 0:
-                    transitionMatrix[x-1,y] = prob
-                if E == 0:
-                    transitionMatrix[x+1,y] = prob
-
     return transitionMatrix
  
 def viterbiFowardAlgorithm(mapData,stateSpace,observationList,errorRate):
@@ -174,17 +156,11 @@ def viterbiFowardAlgorithm(mapData,stateSpace,observationList,errorRate):
     for i in range(K):
         trellisMatrix[i,0] = initialProbability(stateSpace) * Em[i,1] ## CHECK NUMS
 
-    for j in range(1,T):
+    for t in range(1, T):
+        for k in range(K):
+            trellisMatrix[k, t] = np.max(trellisMatrix[:, t-1] * Tm[:, k]) * Em[k, t]
 
-        for i in range(K):
-
-            trellisCol = trellisMatrix[:,j-1]
-            TransCol = Tm[:,i]
-            PriorProb = trellisCol*TransCol
-            trellisMatrix[i,j] = np.max(PriorProb) * Em[i,j]
     
-            
-
     return(trellisMatrix)
 
 
