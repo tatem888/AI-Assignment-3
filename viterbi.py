@@ -54,27 +54,7 @@ def readInputFile():
 #ARRAY OF INIT PROBS - array displaying probability each point could be the starting point. each traversable point has equal probability 1/k, non traversable have prob 0
 #Getting probability array, look into incresing accuracy of Floating points
 
-def initialProbabilitiesArray(mapSize,stateSpace):
-    
-    numTraversablePoints = len(stateSpace)
-    
-    startingProbability = 1/numTraversablePoints
-    IPArray = np.zeros(mapSize)
-
-    for i in stateSpace:
-        x,y = i
-        IPArray[x,y] = startingProbability
-
-    return IPArray
-
-def initialProbability(stateSpace):
-
-    numTraversablePoints = len(stateSpace)
-    startingProbability = 1/numTraversablePoints
-    return startingProbability
-
 #SEQUENCE OF OBSERVATIONS - Number of observations taken (observation list - size T)
-
 
 #TRANSITION MATRIX - K x K matrix of probability that each point will move to another point in one move eg 1000 obs 100 prob will move North, 1100 50 prob move North 50 prob move south
     
@@ -89,7 +69,6 @@ def countMismatchBits(s1,s2):
     
     return count
     
-
 #take map, current state and observation and return number of incorect bits 
 def getIncorrectValues(mapData, state, observation):
 
@@ -104,24 +83,19 @@ def getIncorrectValues(mapData, state, observation):
     return countMismatchBits(neighboursString,observation)
    
 #take inputs and create KxT emisson matrix, then return
-def createEmissionMatrix(mapData, stateSpace, observationList, errorRate,K,T):
+def createEmissionMatrix(mapData, stateSpace, observationList, errorRate):
 
-    ER = errorRate
+    K, T = len(stateSpace), len(observationList)
 
     emissionMatrix = np.zeros([K,T])
 
-    i = 0
-    j = 0
+    for i,state in enumerate(stateSpace):
 
-    for state in stateSpace:
+        for j,observation in enumerate(observationList):
 
-        for observation in observationList:
             dit = getIncorrectValues(mapData,state,observation)
-            emissionMatrix[i,j] = pow(1-ER,4-dit) * pow(ER, dit)
-            j += 1
-        j = 0    
-        i += 1 
-            
+            emissionMatrix[i,j] = pow(1-errorRate, 4-dit) * pow(errorRate, dit)
+        
     return emissionMatrix
 
 #transition matrix
@@ -150,13 +124,16 @@ def viterbiFowardAlgorithm(mapData,stateSpace,observationList,errorRate):
     K = len(stateSpace)
     T = len(observationList)
 
-    Em = createEmissionMatrix(mapData,stateSpace,observationList,errorRate,K,T)
+    Em = createEmissionMatrix(mapData,stateSpace,observationList,errorRate)
     Tm = createTransitionMatrix(K,stateSpace,mapData)
 
     trellisMatrix = np.zeros([K,T])
 
+    initialProbability = 1/K
+
+    #compute for first column with no previous variables
     for i in range(K):
-        trellisMatrix[i,0] = initialProbability(stateSpace) * Em[i,1] ## CHECK NUMS
+        trellisMatrix[i,0] = initialProbability * Em[i,1]
 
     for j in range(1,T):
 
