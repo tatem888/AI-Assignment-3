@@ -7,7 +7,7 @@ import sys
 
 def readInputFile():
 
-    with open("inputFile2.txt", "r") as inputFile:
+    with open(sys.argv[1], "r") as inputFile:
 
         #write map size to tuple
         mapSize = tuple(map(int,inputFile.readline().split()))
